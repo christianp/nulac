@@ -1,0 +1,63 @@
+#container {
+	display: block;
+	margin: 0 auto;
+	width: 400px;
+}
+
+.player.me {
+	background-color: orange;
+}
+.player.current {
+	font-weight: bold;
+}
+
+#messages {
+	border-top: 1px solid black;
+}
+
+#messages .list {
+	max-height: 12em;
+	overflow-y: scroll;
+	padding: 0 1em;
+}
+
+.message {
+	list-style-type: none;
+	margin-left: 0;
+	margin-top: 0.5em;
+	padding: 0.4em;
+}
+
+.message.join {
+	background-color: orange;
+}
+
+.message.played {
+	background-color: lightblue;
+}
+
+.message.badword {
+	background-color: red;
+	color: white;
+}
+
+.message .player {
+	font-weight: bold;
+}
+.message .player:after {
+	content: ':';
+}
+.message.won {
+	background-color: lightgreen;
+}
+
+.available .letter {
+	font-weight: bold;
+}
+
+.playedWord {
+	display: inline-block;
+}
+.playedWord::first-letter {
+	font-weight: bold;
+}

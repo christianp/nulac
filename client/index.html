@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Nulac!</title>
+
+		<!-- jquery -->
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+		<!-- knockout -->
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js"></script>
+
+		<!-- normalise.css -->
+		<link rel="stylesheet" href="http://css.cdn.tl/normalize.css"></link>
+
+		<!-- mathjax -->
+		<!--
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			extensions: ["tex2jax.js"],
+			jax: ["input/TeX", "output/HTML-CSS"],
+			tex2jax: {
+			  inlineMath: [ ['$','$'] ],
+			  displayMath: [ ["\\[","\\]"] ],
+			  processEscapes: true
+			},
+			"HTML-CSS": { availableFonts: ["TeX"] }
+		  });
+		</script>
+		<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
+		-->
+
+		<!-- faye client -->
+		<script type="text/javascript" 
+        	src="http://localhost:1000/faye/client.js">
+		</script>
+
+
+		<script type="text/javascript" src="js/thing.js"></script>
+		<link rel="stylesheet" href="css/thing.css"></link>
+	</head>
+	<body>
+		<div id="container">
+			<form id="join" data-bind="if: !me(), submit: join">
+				<h2>Join</h2>
+				<label>Name: </label><input type="text" class="name"/>
+			</form>
+			<div id="game" data-bind="if: me">
+				<div id="players">
+					<h2>Players</h2>
+					<ul data-bind="foreach: players">
+						<li class="player" data-bind="css: {me: $parent.me()==name, current: $parent.currentPlayer()==name}">
+							<span class="name" data-bind="text: name"></span>
+							<span class="score" data-bind="text: score"></span>
+						</li>
+					</ul>
+				</div>
+				<div id="messages">
+					<h2>Messages</h2>
+					<ul class="list" data-bind="foreach: messages">
+						<li class="message" data-bind="class: kind">
+							<span class="player" data-bind="visible: player, text: player"></span>
+							<span class="message" data-bind="html: message"></span>
+						</li>
+					</ul>
+				</div>
+				<div id="game">
+					<h2>Game</h2>
+					<p>Available letters: <br/>
+						<span class="available" data-bind="foreach: availableLetters">
+							<span class="letter" data-bind="text: $data"></span>
+						</span>
+					</p>
+					<p>Played words: 
+						<ol id="playedWords" data-bind="foreach: playedWords">
+							<li class="playedWord" data-bind="text: $data"></li>
+						</ol>
+					</p>
+				</div>
+				<form data-bind="submit: sendMessage">
+					<label>Chat:</label> <input type="text" class="message"/>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>
+
+
+
