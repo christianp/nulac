@@ -32,7 +32,7 @@
 
 		<!-- faye client -->
 		<script type="text/javascript" 
-        	src="http://localhost:1000/faye/client.js">
+        	src="/faye/client.js">
 		</script>
 
 
@@ -41,17 +41,16 @@
 	</head>
 	<body>
 		<div id="container">
-			<form id="join" data-bind="if: !me(), submit: join">
+			<form id="join" data-bind="if: !playing(), submit: join">
 				<h2>Join</h2>
 				<label>Name: </label><input type="text" class="name"/>
 			</form>
-			<div id="game" data-bind="if: me">
+			<div id="game" data-bind="if: playing">
 				<div id="players">
 					<h2>Players</h2>
 					<ul data-bind="foreach: players">
-						<li class="player" data-bind="css: {me: $parent.me()==name, current: $parent.currentPlayer()==name}">
-							<span class="name" data-bind="text: name"></span>
-							<span class="score" data-bind="text: score"></span>
+						<li class="player" data-bind="css: {me: $parent.myName()==name, current: $parent.currentPlayer()==name}">
+							<span class="name" data-bind="text: name"></span>: <span class="score" data-bind="text: score"></span>
 						</li>
 					</ul>
 				</div>
