@@ -15,14 +15,14 @@ hr {
 	padding: 0;
 	list-style-type: none;
 }
-.player {
+#players .player {
 	padding: 0.2em 0.5em;
 }
 
-.player.me {
+#players .player.me {
 	background-color: orange;
 }
-.player.current {
+#players .player.current {
 	font-weight: bold;
 }
 

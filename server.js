@@ -131,8 +131,8 @@ Game.prototype = {
 	},
 
 	end: function() {
-		//give the winning player 10 points
-		this.currentPlayer.award(10);
+		//give the winning player a point
+		this.currentPlayer.award(1);
 
 		//tell the players
 		this.client.publish('/end-game',this.currentPlayer.name);
@@ -233,9 +233,6 @@ Game.prototype = {
 		//tell the players
 		this.client.publish('/played',{player: this.currentPlayer.name, word: word});
 		this.client.publish('/available-letters',this.availableLetters);
-
-		//give the player a point for each letter
-		this.currentPlayer.award(word.length);
 
 		//if there are unused letters in the word, it's the next player's turn
 		if(this.availableLetters.length)

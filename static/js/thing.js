@@ -194,5 +194,4 @@ $(function() {
 	var game = window.game = new Nulac();
 	ko.applyBindings(game);
 
-	$('#join input').focus();
 });

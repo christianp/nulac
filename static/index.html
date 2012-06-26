@@ -43,7 +43,7 @@
 		<div id="container">
 			<form id="join" data-bind="if: !playing(), submit: join">
 				<h2>Join</h2>
-				<label>Name: </label><input type="text" class="name"/>
+				<label>Name: </label><input type="text" class="name" autofocus/>
 			</form>
 
 			<div id="gameContainer" data-bind="if: playing">
@@ -52,6 +52,19 @@
 					<ul data-bind="foreach: players">
 						<li class="player" data-bind="css: {me: $parent.myName()==name, current: $parent.currentPlayer()==name}">
 							<span class="name" data-bind="text: name"></span>: <span class="score" data-bind="text: score"></span>
+						</li>
+					</ul>
+				</div>
+				<hr/>
+				<div id="messages">
+					<h2>Messages</h2>
+					<ul class="list" data-bind="foreach: {
+							data: messages,
+							afterAdd: function(e){ console.log(e);$(e).hide().slideDown(150)}
+					}">
+						<li class="message" data-bind="class: kind">
+							<span class="player" data-bind="visible: player, text: player"></span>
+							<span class="content" data-bind="html: message"></span>
 						</li>
 					</ul>
 				</div>
@@ -68,22 +81,9 @@
 							<li class="playedWord" data-bind="text: $data"></li>
 						</ol>
 					</p>
-				</div>
-				<hr/>
-				<div id="messages">
-					<h2>Messages</h2>
 					<form data-bind="submit: sendMessage">
 						<label>Chat:</label> <input type="text" class="message"/>
 					</form>
-					<ul class="list" data-bind="foreach: {
-							data: messages,
-							afterAdd: function(e){ console.log(e);$(e).hide().slideDown(150)}
-					}">
-						<li class="message" data-bind="class: kind">
-							<span class="player" data-bind="visible: player, text: player"></span>
-							<span class="message" data-bind="html: message"></span>
-						</li>
-					</ul>
 				</div>
 			</div>
 		</div>
