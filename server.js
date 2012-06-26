@@ -4,7 +4,7 @@ var http = require('http'),
 	express = require('express')
 ;
 
-var wordList = fs.readFileSync('2of12inf.txt').toString().split('\n').map(function(word){return word.toUpperCase().replace(/[^A-Z]/g,'')});
+var wordList = fs.readFileSync('words.txt').toString().split('\n').map(function(word){return word.toUpperCase().replace(/[^A-Z]/g,'')});
 var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 function Player(data) {
@@ -121,6 +121,7 @@ Game.prototype = {
 
 		//tell the players
 		this.client.publish('/new-game','new game');
+		this.client.publish('/available-letters',this.availableLetters);
 
 		//if there are players, pick one to take a turn
 		if(this.players.length) {
@@ -171,7 +172,7 @@ Game.prototype = {
 
 		//if this is the first player, it's their turn
 		if(this.players.length==1)
-			this.nextTurn();
+			this.init();
 
 		return player
 	},

@@ -73,6 +73,7 @@ $(function() {
 		//when a game starts
 		client.subscribe('/new-game',function() {
 			game.receiveMessage({kind: 'new-game', message: 'A new round has started.'});
+			game.playedWords([]);
 		});
 
 		//when a game ends
@@ -166,6 +167,8 @@ $(function() {
 		},
 
 		setCurrentPlayer: function(player) {
+			if(player==this.currentPlayer())
+				return;
 			this.currentPlayer(player);
 			var message = player==this.myName() ? "It's your turn." : "It's "+player+"'s turn.";
 			this.receiveMessage({kind: 'currentplayer', message: message});
@@ -191,4 +194,5 @@ $(function() {
 	var game = window.game = new Nulac();
 	ko.applyBindings(game);
 
+	$('#join input').focus();
 });

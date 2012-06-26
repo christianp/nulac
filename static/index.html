@@ -45,7 +45,8 @@
 				<h2>Join</h2>
 				<label>Name: </label><input type="text" class="name"/>
 			</form>
-			<div id="game" data-bind="if: playing">
+
+			<div id="gameContainer" data-bind="if: playing">
 				<div id="players">
 					<h2>Players</h2>
 					<ul data-bind="foreach: players">
@@ -54,15 +55,7 @@
 						</li>
 					</ul>
 				</div>
-				<div id="messages">
-					<h2>Messages</h2>
-					<ul class="list" data-bind="foreach: messages">
-						<li class="message" data-bind="class: kind">
-							<span class="player" data-bind="visible: player, text: player"></span>
-							<span class="message" data-bind="html: message"></span>
-						</li>
-					</ul>
-				</div>
+				<hr/>
 				<div id="game">
 					<h2>Game</h2>
 					<p>Available letters: <br/>
@@ -76,9 +69,22 @@
 						</ol>
 					</p>
 				</div>
-				<form data-bind="submit: sendMessage">
-					<label>Chat:</label> <input type="text" class="message"/>
-				</form>
+				<hr/>
+				<div id="messages">
+					<h2>Messages</h2>
+					<form data-bind="submit: sendMessage">
+						<label>Chat:</label> <input type="text" class="message"/>
+					</form>
+					<ul class="list" data-bind="foreach: {
+							data: messages,
+							afterAdd: function(e){ console.log(e);$(e).hide().slideDown(150)}
+					}">
+						<li class="message" data-bind="class: kind">
+							<span class="player" data-bind="visible: player, text: player"></span>
+							<span class="message" data-bind="html: message"></span>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</body>
