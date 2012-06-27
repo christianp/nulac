@@ -60,6 +60,9 @@
 				<hr/>
 				<div id="messages">
 					<h2>Messages</h2>
+					<form data-bind="submit: sendMessage">
+						<label>Chat:</label> <input type="text" id="chat"/>
+					</form>
 					<ul class="list" data-bind="foreach: {
 							data: messages,
 							afterAdd: function(e){ console.log(e);$(e).hide().slideDown(150)}
@@ -83,10 +86,19 @@
 							<li class="playedWord" data-bind="text: $data"></li>
 						</ol>
 					</p>
-					<form data-bind="submit: sendMessage">
-						<label>Chat:</label> <input type="text" class="message"/>
-					</form>
+					<div data-bind="">
+						<form data-bind="submit: playWord, visible: myGo">
+							<label>Play a word:</label> <input type="text" id="play"/>
+						</form>
+					</div>
 				</div>
+			</div>
+			<hr/>
+			<div id="rules">
+				<h2>The Rules</h2>
+				<p>Players take turns to say words. Each word must start with one of the letters of the previous word. The first player can say any word they like. Once a letter has been used to start a word, no later words can start with that letter.</p>
+				<p>So if Player 1 says "<span class="playedWord">EGGS</span>", Player 2 must say a word starting with <span class="letter">G</span> or <span class="letter">S</span>, and nobody can say a word beginning with <span class="letter">E</span> later.</p>
+				<p>When a player says a word using only letters that have already been used, the next player can't go, so the game is over and the player who said the last word wins.</p>
 			</div>
 		</div>
 	</body>

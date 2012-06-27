@@ -65,6 +65,7 @@ $(function() {
 
 		//the name of the player whose turn it is
 		this.currentPlayer = subscribeObservable(client,'/current-player');
+		this.myGo = ko.computed(function(){ return this.currentPlayer()==this.myName(); }, this);
 
 		//the letters that can be used
 		this.availableLetters = subscribeObservable(client,'/available-letters');
@@ -175,19 +176,21 @@ $(function() {
 		},
 
 		sendMessage: function(el) {
-			var message = $(el).find('.message').val();
+			var message = $(el).find('#chat').val();
 			$(el).find('.message').val('');
 
-			if(message.toUpperCase() == message) {
-				client.publish('/play',{player: this.myName(), word: message});
-			}
-			else {
-				client.publish('/message',{ 
-					player: this.myName(), 
-					kind: 'chat',
-					message: message 
-				});
-			}
+			client.publish('/message',{ 
+				player: this.myName(), 
+				kind: 'chat',
+				message: message 
+			});
+		},
+
+		playWord: function(el) {
+			var word = $(el).find('#play').val();
+			$(el).find('#play').val('');
+
+			client.publish('/play',{player: this.myName(), word: word});
 		}
 	};
 
