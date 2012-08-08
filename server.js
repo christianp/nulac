@@ -1,3 +1,12 @@
+/* Copyright (c) 2012
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 var http = require('http'),
 	faye = require('faye'),
 	fs = require('fs'),
@@ -7,7 +16,7 @@ var http = require('http'),
 var wordList = fs.readFileSync('words.txt').toString().split('\n').map(function(word){return word.toUpperCase().replace(/[^A-Z]/g,'')});
 var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-function Player(data) {
+function Player(data,game) {
 	this.name = data.name;
 	this.slug = this.name.replace(/\s/g,'-').replace(/[^a-zA-Z\-_!~\(\)\$@]/g,'');
 }
@@ -26,29 +35,21 @@ Player.prototype = {
 
 	sendMessage: function(message,kind) {
 		kind = kind || 'chat';
-		game.client.publish('/message/'+this.slug, {kind: kind, player: 'Nulac', message: message})
+		this.game.client.publish(this.game.prefix+'/message/'+this.slug, {kind: kind, player: 'Nulac', message: message})
 	},
 
 	award: function(points) {
 		this.score += points;
-		game.client.publish('/player/score/'+this.slug,this.score);
+		game.client.publish(this.game.prefix+'/player/score/'+this.slug,this.score);
 	}
 }
 
-function Game() {
+function Game(name,app,bayeux) {
+
+	this.name = name;
+	this.prefix = '/game/'+this.name;
 	
-	//set up the server
-	var app = this.server = express.createServer();
-	app.configure(function () {
-		app.use(express.bodyParser());
-		app.use(express.static(__dirname + '/static'));
-	});
-	app.listen(8123);
-
-
-	//set up faye pub/sub
-	var bayeux = new faye.NodeAdapter({mount: '/faye', timeout: 45});
-	bayeux.attach(app);
+	this.server = app;
 	this.client = bayeux.getClient();
 
 	//make subscriptions to faye channels
@@ -75,7 +76,7 @@ Game.prototype = {
 		;
 
 		//to join a game
-		app.post('/join',function(req,res) {
+		app.post(this.prefix+'/join',function(req,res) {
 			var data = req.body;
 			var player = game.join(data);
 			var odata = game.state();
@@ -84,31 +85,26 @@ Game.prototype = {
 		});
 
 		//to get the current state of the game
-		app.get('/state',function(req,res) {
+		app.get(this.prefix+'/state',function(req,res) {
 			res.send(game.state());
 		});
 
 
-		//404 handlers
-		function notFound(req,res) {
-			res.send('Not found',404);
-		}
-		app.get(/\/.*/,notFound);
-		app.post(/\/.*/,notFound);
 	},
 
 	doSubscriptions: function() {
 		var client = this.client;
 		var game = this;
 
-		client.subscribe('/play',function(data) {
+		//when a player says a word
+		client.subscribe(this.prefix+'/play',function(data) {
 			var player = game.players[data.player];
 			word = data.word.toUpperCase().replace(/[^A-Z]/g,'');
 			game.tryWord(player,word);
 		});
 
 		//debug: echo all messages
-		client.subscribe('/**',function(data) {
+		client.subscribe(this.prefix+'/**',function(data) {
 			console.log(data);
 		});
 	},
@@ -120,8 +116,8 @@ Game.prototype = {
 		this.availableLetters = alphabet.split('');
 
 		//tell the players
-		this.client.publish('/new-game','new game');
-		this.client.publish('/available-letters',this.availableLetters);
+		this.client.publish(this.prefix+'/new-game','new game');
+		this.client.publish(this.prefix+'/available-letters',this.availableLetters);
 
 		//if there are players, pick one to take a turn
 		if(this.players.length) {
@@ -135,7 +131,7 @@ Game.prototype = {
 		this.currentPlayer.award(1);
 
 		//tell the players
-		this.client.publish('/end-game',this.currentPlayer.name);
+		this.client.publish(this.prefix+'/end-game',this.currentPlayer.name);
 
 		//start a new game
 		this.init();
@@ -162,13 +158,14 @@ Game.prototype = {
 	addPlayer: function(data) {
 		//create the player
 		var player = new Player(data);
+		player.game = this;
 
 		//add it to the list
 		this.players.push(player);
 		this.players[player.name] = player;
 
 		//tell the other players
-		this.client.publish('/new-player',player.state());
+		this.client.publish(this.prefix+'/new-player',player.state());
 
 		//if this is the first player, it's their turn
 		if(this.players.length==1)
@@ -184,7 +181,7 @@ Game.prototype = {
 		delete this.players[player.name];
 
 		//tell the other players
-		this.client.publish('/player/left',player.name);
+		this.client.publish(this.prefix+'/player/left',player.name);
 		this.sendMessage({message: player.name+' left the game.', kind: 'player-left'});
 
 		//now it's the next player's turn
@@ -231,8 +228,8 @@ Game.prototype = {
 		this.playedWords.push(word);
 
 		//tell the players
-		this.client.publish('/played',{player: this.currentPlayer.name, word: word});
-		this.client.publish('/available-letters',this.availableLetters);
+		this.client.publish(this.prefix+'/played',{player: this.currentPlayer.name, word: word});
+		this.client.publish(this.prefix+'/available-letters',this.availableLetters);
 
 		//if there are unused letters in the word, it's the next player's turn
 		if(this.availableLetters.length)
@@ -248,7 +245,7 @@ Game.prototype = {
 		this.currentPlayer = this.players[this.turn];
 
 		//tell the players
-		this.client.publish('/current-player',this.currentPlayer.name);
+		this.client.publish(this.prefix+'/current-player',this.currentPlayer.name);
 	},
 
 	sendMessage: function(data) {
@@ -258,7 +255,7 @@ Game.prototype = {
 		data.kind = data.kind || 'chat';
 		data.player = 'Nulac';
 
-		this.client.publish('/message',data);
+		this.client.publish(this.prefix+'/message',data);
 	},
 
 	state: function() {
@@ -271,4 +268,39 @@ Game.prototype = {
 	}
 }
 
-var game = new Game();
+function Controller() {
+	var controller = this;
+
+	this.games = {};
+
+	//set up the server
+	var app = this.server = express.createServer();
+	app.configure(function () {
+		app.use(express.bodyParser());
+		app.use(express.static(__dirname + '/static'));
+	});
+	app.listen(8123);
+
+	//set up faye pub/sub
+	var bayeux = this.bayeux = new faye.NodeAdapter({mount: '/faye', timeout: 45});
+	bayeux.attach(app);
+
+
+	app.get('/games',function(req,res) {
+		var list = [];
+		for(var x in controller.games) { list.push(x) }
+		res.send(list);
+	});
+
+	this.newGame('main');
+	this.newGame('two');
+}
+Controller.prototype = {
+	newGame: function(name) {
+		this.games[name] = new Game(name, this.server, this.bayeux);
+		return true;
+	},
+};
+
+var controller = new Controller();
+
